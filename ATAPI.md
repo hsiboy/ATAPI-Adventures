@@ -9,52 +9,58 @@ Secondary IDE controller: 170h to 177h and 376h to 377h
 
 Each I/O address corresponds to a register on the IDE controller. The following is a list of each I/O address used by ATA controllers and the corresponding regiuster. (I/O addys given are for the primary IDE controller, obviously, but they correspond to the same secondary IDE controller addresses. Thus, for example, the secondary IDE controller's data register is at 170h, the secondary controller's error and features register is at 171h, and so on):
 
-1F0 (Read and Write): Data Register
-1F1 (Read): Error Register
-1F1 (Write): Features Register
-1F2 (Read and Write): Sector Count Register
-1F3 (Read and Write): LBA Low Register
-1F4 (Read and Write): LBA Mid Register
-1F5 (Read and Write): LBA High Register
-1F6 (Read and Write): Drive/Head Register
-1F7 (Read): Status Register
-1F7 (Write): Command Register
-3F6 (Read): Alternate Status Register
-3F6 (Write): Device Control Register
+| Command | Type | Description |
+| --- | --- | --- |
+|`1F0`| Read and Write | Data Register|
+|`1F1`| Read | Error Register|
+|`1F1`| Write | Features Register|
+|`1F2`| Read and Write | Sector Count Register|
+|`1F3`| Read and Write | LBA Low Register|
+|`1F4`| Read and Write | LBA Mid Register|
+|`1F5`| Read and Write | LBA High Register|
+|`1F6`| Read and Write | Drive/Head Register|
+|`1F7`| Read | Status Register|
+|`1F7`| Write | Command Register|
+|`3F6`| Read | Alternate Status Register|
+|`3F6`| Write | Device Control Register|
+
 The status register is an 8-bit register which contains the following bits, listed in order from left to right:
 
-BSY (busy)
-DRDY (device ready)
-DF (Device Fault)
-DSC (seek complete)
-DRQ (Data Transfer Requested)
-CORR (data corrected)
-IDX (index mark)
-ERR (error)
-The error register is also an 8-bit register, and contains the following bits, again listed in order from left to right:
+| Bit | Description |
+| --- | --- |
+|`BSY`| Busy|
+|`DRDY`| Device Ready|
+|`DF`| Device Fault|
+|`DSC`| Seek Complete|
+|`DRQ`| Data transfer Request|
+|`CORR`| Data Corrected|
+|`IDX`| Index mark|
+|`ERR`| Error|
 
-BBK (Bad Block)
-UNC (Uncorrectable data error)
-MC (Media Changed)
-IDNF (ID mark Not Found)
-MCR (Media Change Requested)
-ABRT (command aborted)
-TK0NF (Track 0 Not Found)
-AMNF (Address Mark Not Found)
+The error register is also an 8-bit register, and contains the following bits, again listed in order from left to right:
+| Bit| Description |
+| --- | --- |
+|`BBK`| Bad Block|
+|`UNC`| Uncorrectable data error|
+|`MC`| Media Changed|
+|`IDNF`| ID mark Not Found|
+|`MCR`| Media Change Requested|
+|`ABRT`| Command Aborted|
+|`TK0NF`| Track 0 Not Found|
+|`AMNF`| Address Mark Not Found|
+
 ATA commands are issued by writing the commands to the command register. More specifically, ATA commands are issued using the following steps:
 
 1. Poll the status register until it indicates the device is not busy (BUSY will be set to 0)
-
-2. Disable interrupts (assembler "cli" command)
-
+2. Disable interrupts.
 3. Poll the status register until it indicates the device is ready (DRDY will be set to 1)
-
 4. Issue the command by outputting the command opcode to the command register
+5. Re-enable interrupts.
 
-5. Re-enable interrupts (assembler "sti" command)
+The following program is a relatively simple assembler program to run the `ATA "IDENTIFY DRIVE"` command, and print out the results of this command to the screen.
 
-The following program is a relatively simple assembler program to run the ATA "IDENTIFY DRIVE" command, and print out the results of this command to the screen.
-`
+
+```asm
 MOV DX, 1F7h ;status register
 LOOP1:
 IN AL, DX ;sets AL to status register (which is 8 bits)
@@ -134,7 +140,9 @@ mov ah,004C  ;terminate program
 int 21h
 
 buff db 256 DUP(?) ;buffer to hold the drive identification info
-`
+```
+
+# ATAPI
 
 ATAPI (ATA Packet Interface) is an extension to ATA which essentially allows SCSI commands (commands used to control SCSI devices) to be sent to ATA devices. ATAPI is used specifically for CD-ROM drives, which, when they first started appearing for computers, were almost universally SCSI. Because SCSI controllers were expensive and clunky, the SCSI command set was eventually adopted for IDE, and typical CD-ROM drives today use ATAPI. ATAPI basically uses "packets" (similar to the packet concept of computer networking as it applies to TCP/IP, for example) to send and receive data and commands. Properly speaking, ATAPI is part of the EIDE (Enhanced IDE) standard.
 
@@ -158,7 +166,7 @@ If both BUSY and DRQ are zero, then, the command is probably complete. Technical
 
 The following is an ugly program in assembler to eject a CD-ROM drive. I haven't cleaned up the code as nicely as I should, but it does work as long as you run it in real mode (what Win9x users would call "DOS mode").
 
-`
+```asm
 MOV DX, 177h ;status register
 LOOP1:
 IN AL, DX ;sets AL to status register (which is 8 bits)
@@ -283,4 +291,4 @@ mov ah,004C  ;terminate program
 int 21h
 
 buff db 1Bh, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0
-`
+```
