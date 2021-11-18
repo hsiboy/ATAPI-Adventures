@@ -671,7 +671,7 @@ F2H and F3H     The same as E2H and E3H, only the unit in the
                 
                 
                 
---
+------
 
 Part of the CD-ROM ATAPI function set. If the IDE device only supports packets with 12 bytes length the last 4 bytes are not sent. The great majority of tested devices use 12 byte.
 
@@ -690,5 +690,5 @@ Part of the CD-ROM ATAPI function set. If the IDE device only supports packets w
   0x4E,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00  // idx=176 Stop disk
   ```
   
-  --
+  ------
   
