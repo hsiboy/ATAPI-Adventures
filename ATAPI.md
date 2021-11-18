@@ -299,6 +299,7 @@ buff db 1Bh, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0
 
 On a PC (at least the early ones),  sectors are defined is terms of Cylinders, Heads & Sectors (CHS format). Parameters in early MS-DOS versions were passed via software interrupt INT 13H for sector reads and writes. INT 13H  designates sectors in a somewhat convoluted way (for historical reasons), parameters passed are always as follows:-
 
+```
 AH = 02h
 AL = number of sectors to read/written (must be nonzero)
 CH = low eight bits of cylinder number
@@ -307,6 +308,7 @@ high two bits of cylinder (bits 6-7, hard disk only)
 DH = head number
 DL = drive number (bit 7 set for hard disk)
 ES:BX -> data buffer
+```
 
 Because only 16 heads are allowed with this format, the maxium size for a hard disk is 512MB.
 This wasnt a problem for early 8 bit systems since disk capacity was always less than 512MB. 
@@ -347,7 +349,7 @@ if you are sending LBA or true CHS information to a drive for single sector read
 
 The IDE device appears to the AT bus as a set of registers. The register selection is done with the /CS0, CS1 and A0, A1, A2 lines. Reading/writing is done with the /RD and /WR signals. I have used the 8255 port A signals to make read/write cycles on the IDE bus. What I do is the following:
 
-read cycle:
+### read cycle:
 
 1. put the port B and C of the 8255 in input modus.
 2. set an address and /CS0 and /CS1 signal on the port A of the 8255.
@@ -355,7 +357,7 @@ read cycle:
 4. read the data from port B (and C) of the 8255.
 5. deactivate the /RD signal on the IDE bus by resetting the equivalent bit of port A of the 8255.Back to contents
 
-write cycle:
+### write cycle:
 
 1. put the port B and C of the 8255 in output modus.
 2. set an address and /CS0 and /CS1 signal on the port A of the 8255.
@@ -367,7 +369,7 @@ The only difference between 8 bits and 16 bits transfers is the following:
 
 - In an 8-bit transfer I use only the port B of the 8255 for data transfer. When writing I put data only on the lower byte of the IDE bus; the upper byte is ignored anyway by the IDE device. When reading I read only port B of the 8255; I never even bother to look at the upper byte.
 
-- In an 16-bit transfer I read/write to both the upper and the lower byte of the IDE bus; thus using both port B and port C.
+- In an 16-bit transfer, read/write to both the upper and the lower byte of the IDE bus.
 
 The IDE device appears as the following registers:
 
@@ -394,12 +396,13 @@ This is the error information register when read; the write precompensation regi
 | --- | --- | --- | --- | --- |
 | 0 | 1 | 0 | 1 | 0 |
 
+
 This register could be used to make multi-sector transfers. You'd have to write the number of sectors to transfer in this register. You can use this register to pass the parameter the timeout for idle modus command.
 
 ### Start Sector Register
 
 | /CS0 | /CS1 | A2 | A1 | A0 |
-| --- | --- | --- | --- | --- | --- |
+| --- | --- | --- | --- | --- |
 | 0 | 1 | 0 | 1 | 1 |
 
 This register holds the start sector of the current track to start reading/writing to. 
@@ -408,13 +411,13 @@ For each transfer, write the start sector in this register. Note that the sector
 ### Cylinder Number
 
 | /CS0 | /CS1 | A2 | A1 | A0 |
-| --- | --- | --- | --- | --- | --- |
+| --- | --- | --- | --- | --- |
 | 0 | 1 | 1 | 0 | 0 |
 
 Low byte of the cylinder number. This register holds low byte of the cylinder number for a disk transfer.
 
 | /CS0 | /CS1 | A2 | A1 | A0 |
-| --- | --- | --- | --- | --- | --- |
+| --- | --- | --- | --- | --- |
 | 0 | 1 | 1 | 0 | 1 |
 
 High two bits of the cylinder number. The traditional IDE interface allows only cylinder numbers in the range 0..1023. This register gets the two upper bits of this number. Write the cylinder number's upper two bits into this register before each transfer.
@@ -422,7 +425,7 @@ High two bits of the cylinder number. The traditional IDE interface allows only 
 ### head & device select
 
 | /CS0 | /CS1 | A2 | A1 | A0 |
-| --- | --- | --- | --- | --- | --- |
+| --- | --- | --- | --- | --- |
 | 0 | 1 | 1 | 1 | 0 |
 
 Head and device select register. The bits 3..0 of this register hold the head number (0..15) for a transfer. bit 4 is to be written 0 for access to the IDE master device, and 1 for access to the IDE slave device. bits 7..5 are fixed at 101B in the traditional interface.
@@ -430,24 +433,23 @@ Head and device select register. The bits 3..0 of this register hold the head nu
 ### Command / Status Register.
 
 | /CS0 | /CS1 | A2 | A1 | A0 |
-| --- | --- | --- | --- | --- | --- |
+| --- | --- | --- | --- | --- |
 | 0 | 1 | 1 | 1 | 1 |
 
 command/status register. When written the IDE device regards the data you write to this register as a command. When read you get the status of the IDE device. Reading this register also clears any interrupts from the IDE device to the controller.
 
 | /CS0 | /CS1 | A2 | A1 | A0 |
-| --- | --- | --- | --- | --- | --- |
+| --- | --- | --- | --- | --- |
 | 1 | 0 | 1 | 1 | 0 |
 
 2nd status register/interrupt and reset register. When read this register gives you the same status byte as the primary status register. The only difference is that reading this register does not clear the interrupt from the IDE device when read. When written you can enable/disable the interrupts the IDE device generates; Also you can give a software reset to the IDE device.
 
 | /CS0 | /CS1 | A2 | A1 | A0 |
-| --- | --- | --- | --- | --- | --- |
+| --- | --- | --- | --- | --- |
 | 1 | 0 | 1 | 1 | 1 |
 
 Active status of the IDE device. In this register (read-only) you can find out if the IDE master or slave is currently active and find the currently selected head number. 
 Also used find out if the floppy (ZIP) is currently in the drive.
-
 
 Some of these registers have bitwise meanings. I'll elaborate on that here:
 
@@ -455,6 +457,9 @@ Some of these registers have bitwise meanings. I'll elaborate on that here:
 ### head and device register:
 
 A write register that sets the master/slave selection and the head number.
+
+
+```
 
 bits 3..0: head number [0..15]
 bit  4   : master/slave select: 0=master,1=slave
@@ -465,10 +470,13 @@ bits 7..5: fixed at 101B. This is in fact the bytes/sector
            pattern is a relic from the MFM controllers age. The
            bit 6 of this pattern could in fact be used to access
            a disk in LBA mode.
+```
            
 ### Status register:
 
 Both the primary and secondary status register use the same bit coding. The register is a read register.
+
+```
 bit 0    : error bit. If this bit is set then an error has
            occurred while executing the latest command. The error
            status itself is to be found in the error register.
@@ -492,6 +500,7 @@ bit 6    : RDY bit. indicates that the disk has finished its
 bit 7    : BSY bit. This bit is set when the disk is doing
            something for you. You have to wait for this bit to
            clear before you can start giving orders to the disk.
+```
 
 
 ### interrupt and reset register:
