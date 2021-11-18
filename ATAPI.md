@@ -1,4 +1,10 @@
-# An Introduction To Programming With ATA And ATAPI
+# An Introduction To Programming With ATA And ATAP
+
+the standard translated geometry for all Zip drives is 512 cylinders, 12 heads,
+and 32 sectors per track. LBA translation of the drive geometry results in a
+translated geometry of 97 cylinders, 32 heads, and 63 sectors per track. Zip
+drives using standard Zip disk geometry will be unable to read the
+
 
 If you're familiar with computer maintenance procedures, you're probably familiar with IDE (Integrated Drive Electronics), the typical standard for connecting hard drives and CD-ROM drives to a PC. ATA (AT Attachment) is essentially the same thing as IDE; just a different name.
 
