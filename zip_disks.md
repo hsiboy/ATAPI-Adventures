@@ -53,3 +53,17 @@ As mentioned above, when jumpered appropriately the disk only reports 100646912 
 The geometry of an IOMEGA ZIP 250 ATAPI FLOPPY drive is reported as 239/64/32 corresponding to 489472 sectors or 250609664 bytes. Thus, this time the drive claims 30 KiB less than a 250 MB disk.
 
 The geometry of an LS120 drive is reported as 963/8/32 corresponding to the same 126222336 bytes that the disk reports.
+
+-----
+
+## Identifying IDE vs ATAPI
+
+The IDE and ATAPI Zip drives have identical information sored in firmware, except the firmware revision has a different format depending on the drive type:
+
+- The ATAPI drive firmware appears in the following format (note that the letter follows the number):
+
+  `IOMEGA ZIP 100 23.D`
+
+- The IDE firmware number has the opposite format (note that the letter precedes the number):
+
+  `IOMEGA ZIP 100 B.29`
