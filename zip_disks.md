@@ -7,6 +7,11 @@ Non-present disks have a capacity of 0 bytes
 250MB disks have a capacity of 250640384 bytes, i.e., 489532 sectors
 LS120 disks have a capacity of 126222336 bytes, i.e., 246528 sectors
 
+> Note
+Iomega measures its disk capacities in megabytes where 1 megabyte = one million bytes.
+This is less than the conventional definition where 1 megabyte = 1,048,576 bytes.
+
+
 ## 1.2 Partition Table or not?
 The ATAPI Removable Drive (ARMD) spec developed by Compaq and Phoenix Technologies describes ARMD media as big floppy disks. In particular, they have no partition table.
 
