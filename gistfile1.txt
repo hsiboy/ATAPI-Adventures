@@ -1,9 +1,9 @@
-CompactFlash cards and DMA/UDMA support in True IDE (tm) mode
-By: Frank Rysanek of FCC PS [rysanek (AT) fccps.cz]
-Introduction
+# CompactFlash cards and DMA/UDMA support in True IDE (tm) mode
+
+## Introduction
 CompactFlash cards have been a popular choice for boot drives in embedded PC's for several years. Depending on the state/wiring of some configuration pins in its socket, a CompactFlash card can assume three essential modes of operation: "memory mapped", "IO mapped" and "True IDE". In True IDE mode, you can attach it to the IDE channel of any stock PC IDE controller (via an appropriate passive socket adaptor) and it behaves exactly like an IDE device, at least at the interface protocol level. (U)DMA is only relevant in the TrueIDE mode. Note that most photo cameras and USB readers access the cards in "memory mapped" mode, where the (U)DMA capability is irrelevant and is certainly not required for reaching the card's full speed.
 
-The (U)DMA catch
+## The (U)DMA catch
 Originally, CompactFlash cards in TrueIDE mode only supported PIO modes (up to PIO4) and did not support DMA (MWDMA, UDMA). The original/traditional "IDE" wiring of the CompactFlash socket reflected that status quo. Later on though, UDMA-capable CF cards have become available. If you buy an UDMA-capable CF card based on the past impression that there's nothing to go wrong with the True IDE mode, and based on the total lack of any warning in any relevant marketing and technical documentation, you have a good chance of suffering a nasty shock: you plug the card into your trusty CF-to-IDE socket, and the card appears dead!
 
 The trouble is that, compared to PIO, the DMA modes (not just UDMA, but also MWDMA) need two more signals in the CF socket: DMA REQ and ACK. These two signals are nowadays commonly present in all "enhanced IDE" channels (usually integrated on-chip in the system south bridge), but many CF sockets on the market today lack those signals! In traditional IDE-enabled CF sockets, pin 43 is floating free and pin 44 is wired to +5V (power supply line). In a UDMA-capable socket, these should be wired to the UDMA signals, i.e. CF(43)->IDE(21) = DMA REQ and CF(44)->IDE(29) = DMA ACK.
