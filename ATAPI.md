@@ -63,6 +63,14 @@ ATA commands are issued by writing the commands to the command register. More sp
 4. Issue the command by outputting the command opcode to the command register
 5. Re-enable interrupts.
 
+>I hate to break it to newbie IDE programmers, but reading back the sector isn't quite the simple "read N bytes" from the drive. In reality, you wait for the drive to signal DRQ, and then read back the length of data it has available for you to read by, then you read that amount, and if more data is due, then you wait for another IRQ and DRQ signal.
+
+>In most cases, the DRQ returned by the drive is the same length you passed in, but *NOT ALWAYS*. Many cheap laptop drives for example will only return "2048" because they don't have a lot of buffer, and many DVD-ROM drives like to vary the DRQ size per transfer for whatever reason, whether "dynamically" according to CD-ROM spin speed or based on whatever data it's managed to read and buffer so far.
+
+>On the positive side, it means that on an error, the transfer can abort early if it needs to.
+
+
+
 The following program is a relatively simple assembler program to run the `ATA "IDENTIFY DRIVE"` command, and print out the results of this command to the screen.
 
 
