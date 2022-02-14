@@ -8,9 +8,6 @@ Originally, CompactFlash cards in TrueIDE mode only supported PIO modes (up to P
 
 The trouble is that, compared to PIO, the DMA modes (not just UDMA, but also MWDMA) need two more signals in the CF socket: DMA REQ and ACK. These two signals are nowadays commonly present in all "enhanced IDE" channels (usually integrated on-chip in the system south bridge), but many CF sockets on the market today lack those signals! In traditional IDE-enabled CF sockets, pin 43 is floating free and pin 44 is wired to +5V (power supply line). In a UDMA-capable socket, these should be wired to the UDMA signals, i.e. CF(43)->IDE(21) = DMA REQ and CF(44)->IDE(29) = DMA ACK.
 
-Photo of a modded CF-IDE adaptor, with pin labels added
-(Click for a full-size image with pin labels)
-
 Many of you have previously met the classic UDMA game of hide'n'seek consisting in 40wire vs. 80wire IDE cable, the automatic detection of a 40pin cable, some of you may have worked with a setup where the 40pin cable is not detected and the machine tries the higher UDMA modes (anything above UDMA2 = 33 MBps) and fails to operate reliably, some of you may have experimented with forcing higher UDMA modes on setups where a 40pin attach is normally detected, but the conductors are actually quite short and the higher transfer rates actually work... (ide_core.ignore_cable=[channel_number])
 
 So, for those of you who are aware of that classic UDMA 40wire vs. 80wire stuff, note that this CF DMA/UDMA affair is quite a different story. If you try to run a DMA-capable CF card in an old PIO-only CF socket, the card doesn't work at all, UDMA2 doesn't help, not even MWDMA, and there's no salvation in automatic fallback to PIO. The CF card is identified by the BIOS and OS, but as soon as the BIOS or the OS attempts some UDMA transfer, that IO transaction immediately grinds to a screeching halt, maybe followed by a series of pathetic messages about timeouts and bus resets. Your only chance out of this mess is by forcing "PIO4 only" in some way, ahead of talking (U)DMA to the card at all (since the last power-up/reset).
@@ -33,7 +30,9 @@ A value of zero means auto-detect (try the highest rate possible). To limit the 
 Load the registry hive offline (in RegEdit.exe) from the target CF card attached via USB.
 Clone the CF card to a full-fledged IDE drive, boot from the IDE drive (attached via a conventional IDE connector), change the registry key(s), and finally clone the IDE drive back to the affected CF card.
 If the system you're using is really XP Embedded, rather than desktop XP, you can also insert the desired values for the registry keys in the Windows XP Embedded Studio (= at image creation time).
+
 For the record, here are some other possible values and meanings for <Master|Slave>DeviceTimingMode, as reported by various anonymous sources on assorted tech support forums:
+
 ATA133 UDMA-6	00012010
 ATA100 UDMA-5	00010010
 ATA66 UDMA-4	00008010
@@ -43,6 +42,6 @@ ATA33 UDMA-2	00002010
 MWDMA-2	00000410
 MWDMA-1	00000210
 PIO4	00000010
+
 As for Linux, you can pass some command-line arguments to the kernel at your bootloader's command prompt (Lilo or Grub). Usually all you need to do is type the name of your boot profile, followed by the additional arguments. Linux 2.4 and early Linux 2.6 accepted ide=nodma (MWDMA/UDMA disable on all IDE channels). Linux 2.6 in some earlier versions accepted e.g. ide0=nodma for the primary IDE channel. Latter Linux 2.6 versions accept an even more refined argument, in the format of ide_core.nodma=x.y , where x = channel number and y = drive number, both of them zero-based. E.g., ide_core.nodma=0.1 means "disable DMA for the primary slave". For permanent configuration, obviously you can put this on the "append" line in lilo.conf or just after the kernel image name in Grub's menu.lst. Note that historically the introduction of the latter ide_core.nodma syntax highly correlates with the moment when Libata became the default driver package even for parallel IDE in many Linux distributions. The ide_core.nodma only works for the legacy IDE driver stack, not for libata - so if your IDE drives and TrueIDE CF cards are all detected as sda/sdb/sdc/sdd etc (SCSI naming convention in Linux), rather than hda/hdb/hdc/hdd etc (IDE naming convention in Linux), try libata.dma=0 (or up to 2, which should allow DMA for all ATA devices except CFA). Alternatively, you can check your kernel's compile-time configuration, disable any Libata drivers for parallel IDE and enable the "legacy" IDE subsystem... then recompile and reinstall the kernel, which is a different story.
-Links
-IDE to CF conversion adaptor pinout, including ATA DMA signals
+
